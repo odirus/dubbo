@@ -20,6 +20,7 @@ import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.URLBuilder;
 import org.apache.dubbo.common.Version;
 import org.apache.dubbo.common.config.configcenter.DynamicConfiguration;
+import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.extension.ExtensionLoader;
 import org.apache.dubbo.common.logger.Logger;
 import org.apache.dubbo.common.logger.LoggerFactory;
@@ -483,6 +484,11 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
 
         // The combination of directoryUrl and override is at the end of notify, which can't be handled here
         this.overrideDirectoryUrl = this.overrideDirectoryUrl.addParametersIfAbsent(providerUrl.getParameters()); // Merge the provider side parameters
+
+        // not override tag parameter from provider when consumer without it
+        if (registeredConsumerUrl != null && StringUtils.isEmpty(registeredConsumerUrl.getParameter(CommonConstants.TAG_KEY))) {
+            this.overrideDirectoryUrl = this.overrideDirectoryUrl.removeParameter(CommonConstants.TAG_KEY);
+        }
 
         if ((providerUrl.getPath() == null || providerUrl.getPath()
                 .length() == 0) && DUBBO_PROTOCOL.equals(providerUrl.getProtocol())) { // Compatible version 1.0
